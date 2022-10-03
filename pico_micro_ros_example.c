@@ -1,5 +1,4 @@
 #include <stdio.h>
-// #include <iostream>
 #include "hardware/pio.h"
 #include "hardware/timer.h"
 #include "hardware/pwm.h"
@@ -14,24 +13,6 @@
 
 #include "pico/stdlib.h"
 #include "pico_uart_transports.h"
-
-#define RCCHECK(fn)                                                                      \
-    {                                                                                    \
-        rcl_ret_t temp_rc = fn;                                                          \
-        if ((temp_rc != RCL_RET_OK))                                                     \
-        {                                                                                \
-            printf("Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc); \
-            return 1;                                                                    \
-        }                                                                                \
-    }
-#define RCSOFTCHECK(fn)                                                                    \
-    {                                                                                      \
-        rcl_ret_t temp_rc = fn;                                                            \
-        if ((temp_rc != RCL_RET_OK))                                                       \
-        {                                                                                  \
-            printf("Failed status on line %d: %d. Continuing.\n", __LINE__, (int)temp_rc); \
-        }                                                                                  \
-    }
 
 const uint LED_PIN = 25;
 uint slice_num;
@@ -51,22 +32,22 @@ std_msgs__msg__Int32 msg_base_sub;
 rcl_subscription_t subscriber_diy;
 std_msgs__msg__Int32 msg_diy_sub;
 
-
 int new_value, delta, old_value = 0;
 const uint PIN_AB = 10;
 PIO pio = pio0;
 const uint sm = 0;
-int output_pwm ;
+int output_pwm;
 int target_value;
 void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
     new_value = quadrature_encoder_get_count(pio, sm);
     delta = new_value - old_value;
     old_value = new_value;
-    msg_speed.data  = delta;
+    msg_speed.data = delta;
     rcl_ret_t ret = rcl_publish(&publisher_base, &msg_speed, NULL);
     output_pwm += PID_caculate(delta, target_value);
-    pwm_set_chan_level(slice_num, PWM_CHAN_A, output_pwm );
+    pwm_set_chan_level(slice_num, PWM_CHAN_A, output_pwm);
+    // printf("Speed now: %s  Speed target %s\n" , delta,target_value);
     // msg_base.data++;
 }
 
@@ -88,91 +69,16 @@ void subscription_callback_base(const void *msgin_base)
         gpio_set_dir(LED_PIN, 0);
     }
     k *= -1;
-    pwm_set_chan_level(slice_num, PWM_CHAN_A, 0.2* 62500);
+    pwm_set_chan_level(slice_num, PWM_CHAN_A, 0.2 * 62500);
 }
 
-// class PID_class
-// {
-//     private:
-//         float kp, ki, kd;
-//         float err, last_err;
-//         float err_i;
-//         float err_d;
-//         float fix;
-
-//     public:
-//         PID_class(int p, int i, int d)
-//         {
-//             kp = p;
-//             ki = i;
-//             kd = d;
-//             std::cout << kp << " " << ki << " " << kd;
-//         };
-
-//         void PID_init(int p, int i, int d)
-//         {
-//             PID_class(p, i, d);
-//         };
-
-//         void PID_change(int p, int i, int d)
-//         {
-//             kp = p;
-//             ki = i;
-//             kd = d;
-//             std::cout << kp << " " << ki << " " << kd;
-//         };
-
-//         int caculate(int now, int target)
-//         {
-//             err = target - now;
-//             err_i += err;
-//             err_d = err - last_err;
-//             last_err = err;
-
-//             fix = kp * err + ki * err_i + kd * err_d;
-//             return fix;
-//         }
-        
-// }PID(5, 0.5, 0);
-
-// typedef struct _PID_class
-// {
-//     float kp, ki, kd;
-//     float err, last_err;
-//     float err_i;
-//     float err_d;
-//     float fix;
-
-//     void (*PID_set)(struct _PID_class this,int p,int i,int d);
-//     int (*PID_caculate)(struct _PID_class this,int now, int target);
-
-// }PID_class;
-
-// void PID_set(struct _PID_class this,int p,int i,int d)
-// {
-//     this.kp = p;
-//     this.ki = i;
-//     this.kd = d;
-// };
-
-// int PID_caculate(struct _PID_class this,int now, int target)
-// {
-//     this.err = target - now;
-//     this.err_i += this.err;
-//     this.err_d = this.err - this.last_err;
-//     this.last_err = this.err;
-
-//     this.fix = this.kp * this.err + this.ki * this.err_i + this.kd * this.err_d;
-//     return this.fix;
-// }
-
-float kp=5, ki=0.5, kd;
+float kp = 5, ki = 0.5, kd;
 float err, last_err;
 float err_i;
 float err_d;
 float fix;
 
-void PID_set(int p,int i,int d)
+void PID_set(int p, int i, int d)
 {
     kp = p;
     ki = i;
@@ -192,16 +98,8 @@ int PID_caculate(int now, int target)
 
 void subscription_callback_diy(const void *msgin_diy)
 {
-    // Cast received message to used type
     const std_msgs__msg__Int32 *msg_diy = (const std_msgs__msg__Int32 *)msgin_diy;
-
-    // output_pwm += PID_caculate(delta, (float)msg_diy->data);
     target_value = (int)msg_diy->data;
-    
-    float _value = (float)msg_diy->data / 100 ;
-    // pwm_set_chan_level(slice_num, PWM_CHAN_A, _value * 62500);
-    // pwm_set_chan_level(slice_num, PWM_CHAN_A, output_pwm );
-
 }
 
 int main()
@@ -229,7 +127,7 @@ int main()
     pwm_set_enabled(slice_num, true);
     pwm_set_chan_level(slice_num, PWM_CHAN_A, 1 * 62500);
 
-    // // encoder init begin 
+    // // encoder init begin
     // int new_value, delta, old_value = 0;
     // //编码器一根线接到Pin10 另外一根接到11
     // const uint PIN_AB = 10;
@@ -238,8 +136,6 @@ int main()
     uint offset = pio_add_program(pio, &quadrature_encoder_program);
     quadrature_encoder_program_init(pio, sm, offset, PIN_AB, 0);
     // encoder end
-
-
 
     rcl_timer_t timer;
     rcl_node_t node;
@@ -317,9 +213,7 @@ int main()
         rclc_executor_spin_some(&executor, RCL_MS_TO_NS(1));
         rcl_ret_t ret_diy = rcl_publish(&publisher_diy, &msg_diy, NULL);
         msg_diy.data *= -1;
-        gpio_put(LED_PIN, msg_diy.data+1);
-
-        // sleep_ms(500);
+        gpio_put(LED_PIN, msg_diy.data + 1);
     }
     return 0;
 }
