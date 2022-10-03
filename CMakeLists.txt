@@ -19,9 +19,6 @@ add_executable(pico_micro_ros_example
 
 pico_generate_pio_header(pico_micro_ros_example ${CMAKE_CURRENT_LIST_DIR}/quadrature_encoder.pio)
 
-
-# target_sources(pico_micro_ros_example PRIVATE pico_micro_ros_example.cpp)
-
 target_link_libraries(pico_micro_ros_example
     pico_stdlib
     pico_multicore
@@ -35,7 +32,7 @@ target_include_directories(pico_micro_ros_example PUBLIC
 )
 
 SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections -std=c++11")
 
 # Configure Pico
 pico_enable_stdio_usb(pico_micro_ros_example 1)
