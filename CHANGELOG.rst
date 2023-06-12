@@ -2,8 +2,8 @@
 Changelog for package micro_ros_raspberrypicosdk
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.1 (2023-06-12)
+------------------
 * micro-ROS humble Library auto-update 09-06-2023 12:57 (`#901 <https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk/issues/901>`_)
 * micro-ROS humble Library auto-update 16-05-2023 07:48 (`#884 <https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk/issues/884>`_)
 * Deprecate galactic and Sort output of library_generation (`#879 <https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk/issues/879>`_)
